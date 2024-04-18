@@ -1,0 +1,5 @@
+@import "remove.css";
+
+.checked {
+  text-decoration: line-through;
+}
