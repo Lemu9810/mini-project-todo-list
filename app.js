@@ -21,21 +21,24 @@ function addTodo(key, todo, Check) {
   const newCheckBox = document.createElement("input");
   newCheckBox.setAttribute("type", "checkbox");
   newCheckBox.checked = Check;
-  newLi.appendChild(newCheckBox);
   newCheckBox.addEventListener("click", isChecked);
 
   const newTodo = document.createElement("span");
   newTodo.innerText = todo;
-  newLi.appendChild(newTodo);
 
-  const newXbtn = document.createElement("input");
-  newXbtn.setAttribute("type", "button");
-  newXbtn.setAttribute("value", "x");
-  newLi.appendChild(newXbtn);
+  const iconX = document.createElement("i");
+  iconX.setAttribute("class", "fa-solid fa-x");
+
+  const newXbtn = document.createElement("button");
+  newXbtn.append(iconX);
   newXbtn.addEventListener("click", deleteTodo);
 
-  if (Check) newLi.classList.add("checked");
+  newLi.appendChild(newCheckBox);
+  newLi.appendChild(newTodo);
+  newLi.appendChild(newXbtn);
   todoList.appendChild(newLi);
+
+  if (Check) newLi.classList.add("checked");
 }
 
 function saveTodo(key, todoValue) {
@@ -45,18 +48,17 @@ function saveTodo(key, todoValue) {
 }
 
 function deleteTodo(event) {
-  const button = event.target;
-  const removeId = button.parentElement.id;
+  const buttonParents = event.target.parentElement.parentElement;
 
   let storedItems = JSON.parse(localStorage.getItem("items")) || {};
-  delete storedItems[removeId];
+  delete storedItems[buttonParents.id];
   localStorage.setItem("items", JSON.stringify(storedItems));
 
   let storedChecks = JSON.parse(localStorage.getItem("checks")) || [];
-  storedChecks = storedChecks.filter((e) => e !== removeId);
+  storedChecks = storedChecks.filter((e) => e !== buttonParents.id);
   localStorage.setItem("checks", JSON.stringify(storedChecks));
 
-  button.parentElement.remove();
+  buttonParents.remove();
 }
 
 function loadTodo() {
