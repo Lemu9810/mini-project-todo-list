@@ -1,91 +1,81 @@
 const form = document.querySelector(".todo-box__input form");
 const inputTodo = document.querySelector(".todo-box__input .input-text");
 const todoList = document.querySelector(".todo-box__list ul");
-const liCount = document.querySelectorAll("li").length;
 
-form.addEventListener("submit", addBtnClick);
-loadTodo();
+let todos = [];
 
-function addBtnClick(event) {
+class Todo {
+  constructor(key, content, checked) {
+    this.key = key;
+    this.content = content;
+    this.checked = checked;
+  }
+}
+
+function onClickSubmit(event) {
   event.preventDefault();
   const key = new Date().getTime();
-  addTodo(key, inputTodo.value, false);
-  saveTodo(key, inputTodo.value);
+  const content = inputTodo.value;
+  const checked = false;
+
+  const newTodo = new Todo(key, content, checked);
+  todos.push(newTodo);
+  saveTodos();
+  printTodos(newTodo);
   inputTodo.value = "";
 }
 
-function addTodo(key, todo, Check) {
-  const newLi = document.createElement("li");
-  newLi.setAttribute("id", key);
-
-  const newCheckBox = document.createElement("input");
-  newCheckBox.setAttribute("type", "checkbox");
-  newCheckBox.checked = Check;
-  newCheckBox.addEventListener("click", isChecked);
-
-  const newTodo = document.createElement("span");
-  newTodo.innerText = todo;
-
-  const iconX = document.createElement("i");
-  iconX.setAttribute("class", "fa-solid fa-x");
-
-  const newXbtn = document.createElement("button");
-  newXbtn.append(iconX);
-  newXbtn.addEventListener("click", deleteTodo);
-
-  newLi.appendChild(newCheckBox);
-  newLi.appendChild(newTodo);
-  newLi.appendChild(newXbtn);
-  todoList.appendChild(newLi);
-
-  if (Check) newLi.classList.add("checked");
+function loadTodos() {
+  const savedTodos = JSON.parse(localStorage.getItem("todos")) || [];
+  todos = savedTodos;
 }
 
-function saveTodo(key, todoValue) {
-  let storedItems = JSON.parse(localStorage.getItem("items")) || {};
-  storedItems[key] = todoValue;
-  localStorage.setItem("items", JSON.stringify(storedItems));
+function saveTodos() {
+  localStorage.setItem("todos", JSON.stringify(todos));
 }
 
-function deleteTodo(event) {
-  const buttonParents = event.target.parentElement.parentElement;
+function printTodos(newTodo) {
+  const newList = document.createElement("li");
+  const newCheck = document.createElement("input");
+  const newSpan = document.createElement("span");
+  const newI = document.createElement("i");
+  const newBtn = document.createElement("button");
 
-  let storedItems = JSON.parse(localStorage.getItem("items")) || {};
-  delete storedItems[buttonParents.id];
-  localStorage.setItem("items", JSON.stringify(storedItems));
+  newList.setAttribute("id", newTodo.key);
+  newCheck.setAttribute("type", "checkbox");
+  newCheck.checked = newTodo.checked;
+  newCheck.addEventListener("click", onClickCheck);
+  newSpan.innerText = newTodo.content;
+  newI.setAttribute("class", "fa-solid fa-x");
+  newBtn.append(newI);
+  newBtn.addEventListener("click", onClickDelate);
 
-  let storedChecks = JSON.parse(localStorage.getItem("checks")) || [];
-  storedChecks = storedChecks.filter((e) => e !== buttonParents.id);
-  localStorage.setItem("checks", JSON.stringify(storedChecks));
+  if (newTodo.checked) newList.classList.add("checked");
 
-  buttonParents.remove();
+  newList.append(newCheck, newSpan, newBtn);
+  todoList.appendChild(newList);
 }
 
-function loadTodo() {
-  const storedItems = JSON.parse(localStorage.getItem("items")) || {};
-  const storedChecks = JSON.parse(localStorage.getItem("checks")) || [];
-
-  if (storedItems.length !== 0) {
-    for (let key in storedItems) {
-      storedChecks.includes(key)
-        ? addTodo(key, storedItems[key], true)
-        : addTodo(key, storedItems[key], false);
+function onClickCheck(event) {
+  const checkParents = event.target.parentElement;
+  todos.map((todo) => {
+    if (todo.key === +checkParents.id) {
+      todo.checked = !todo.checked;
+      checkParents.classList.toggle("checked");
     }
-  }
+  });
+  saveTodos();
 }
 
-function isChecked(event) {
-  const checkBox = event.target;
-  const CHECKED = "checked";
-  let storedChecks = JSON.parse(localStorage.getItem("checks")) || [];
-
-  if (checkBox.checked) {
-    checkBox.parentElement.classList.add(CHECKED);
-    storedChecks.push(checkBox.parentElement.id);
-  } else {
-    checkBox.parentElement.classList.remove(CHECKED);
-    storedChecks = storedChecks.filter((e) => e !== checkBox.parentElement.id);
-  }
-
-  localStorage.setItem("checks", JSON.stringify(storedChecks));
+function onClickDelate(event) {
+  const buttonParents = event.target.parentElement.parentElement;
+  todos = todos.filter((todo) => todo.key !== +buttonParents.id);
+  buttonParents.remove();
+  saveTodos();
 }
+
+loadTodos();
+todos.length > 0
+  ? todos.forEach((todo) => printTodos(todo))
+  : console.log("no saved date");
+form.addEventListener("submit", onClickSubmit);
