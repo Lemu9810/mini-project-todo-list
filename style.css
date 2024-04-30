@@ -1,5 +1,10 @@
 @import "remove.css";
 
+:root {
+  --l-size: 2rem;
+  --s-size: 1rem;
+}
+
 .checked {
   text-decoration: line-through;
 }
@@ -10,6 +15,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: var(--s-size);
 }
 
 .todo-box {
@@ -21,7 +27,7 @@ body {
 
 .todo-box__header h3 {
   text-align: center;
-  font-size: 30px;
+  font-size: var(--l-size);
   font-weight: 600;
   margin-bottom: 15px;
 }
@@ -63,7 +69,6 @@ body {
 
 .todo-box__list ul li :last-child {
   border: none;
-  font-size: 10px;
   background-color: transparent;
 }
 
